@@ -24,7 +24,7 @@ def colored_txt(text, rgb:tuple, highlight:bool=False):
         print(rgb)
         if rgb == (0,0,0):
             print(0)
-            return "ddddd"
+            return ".."
         return f"\033[48;2;{r};{g};{b}m{text}\033[0m"
     return f"\x1b[38;2;{r};{g};{b}m{text}\x1b[0m"
 
@@ -68,9 +68,9 @@ class Player():
                     for b in range(len(block[i])):
                         block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
                     printStuff[i] += "".join(block[i])
-                    printStuff[i] += "  "
+                    printStuff[i] += ".."
                 except:
-                    printStuff[i] += " "*len(block[0]) + "  "
+                    printStuff[i] += "."*len(block[0]) + ".."
         printStuff.append("")
 
         while len(printStuff[-2]) > 101:
