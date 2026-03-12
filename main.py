@@ -21,10 +21,8 @@ import sys
 def colored_txt(text, rgb:tuple, highlight:bool=False):
     r, g, b = rgb[0], rgb[1], rgb[2]
     if highlight:
-        print(rgb)
         if rgb == (0,0,0):
-            print(0)
-            return ".."
+            return text
         return f"\033[48;2;{r};{g};{b}m{text}\033[0m"
     return f"\x1b[38;2;{r};{g};{b}m{text}\x1b[0m"
 
@@ -42,7 +40,7 @@ class Player():
     def __init__(self, num, colors):
         self.num = num
         self.color = colors[self.num]
-        self.blocks = [[[1]], [[1,1]], [[1,1,1]], [[1,1,1,1]], [[1,1,1,1,1]], [[1,1],[0,1]], [[1,1,1],[0,0,1]], [[1,1,1],[0,1,0]], [[1,1],[1,1]], [[1,1,0],[0,1,1]], [[1,1,1,1],[1,0,0,0]], [[1,1,1,0],[0,0,1,1]], [[1,1,1],[0,1,1]], [[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0,0],[1,1,1,1]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]
+        self.blocks = [[[[1],[0],[0]], [[1,1],[0,0],[0,0]], [[1,1,1],[0,0,0],[0,0,0]], [[1,1,1,1],[0,0,0,0],[0,0,0,0]], [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]]], [[[1,1],[0,1],[0,0]], [[1,1,1],[0,0,1],[0,0,0]], [[1,1,1],[0,1,0],[0,0,0]], [[1,1],[1,1],[0,0]], [[1,1,0],[0,1,1],[0,0,0]], [[1,1,1,1],[1,0,0,0],[0,0,0,0]], [[1,1,1,0],[0,0,1,1],[0,0,0,0]], [[1,1,1],[0,1,1],[0,0,0]]], [[[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0,0],[1,1,1,1],[0,0,0,0]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]]
         sleep(0.5)
         self.name = self.getName()
         print()
@@ -61,24 +59,19 @@ class Player():
     
     def displayBlocks(self):
         printStuff = []
-        for i in range(3):
-            printStuff.append("")
-            for block in self.blocks:
-                try:
-                    for b in range(len(block[i])):
-                        block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
-                    printStuff[i] += "".join(block[i])
-                    printStuff[i] += ".."
-                except:
-                    printStuff[i] += "."*len(block[0]) + ".."
-        printStuff.append("")
 
-        while len(printStuff[-2]) > 101:
-            printStuffLen = len(printStuff)
-            for i in range(printStuffLen):
-                printStuff.append(printStuff[i][101:])
-                printStuff[i] = printStuff[i][:101]
-            printStuff.append("")
+        for i in range(3): # for each row bc each block takes 3 rows
+            for section in range(len(self.blocks)): # for each section so the user can see easier
+                printStuff.append("")
+
+                for block in self.blocks[section]: # for each block in the section
+                    for b in range(len(block[i])): # for each pixel in the row of the block
+                        block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
+
+                    printStuff[section*i] += "".join(block[i])
+                    printStuff[section*i] += "  "
+
+        printStuff.append("")
 
         for i in printStuff:
             print(i)
