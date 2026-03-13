@@ -1,4 +1,8 @@
-# FIX DISPLAYING BLOCKS
+# NOTE:
+# input question color: (0,255,255)
+# input answer color: (74,134,232)
+# error word color: (255,0,0)
+# error message color: (200,0,0)
 
 """
 matrix = [
@@ -34,13 +38,13 @@ def clear_screen():
     sys.stdout.write('\033c')
     sys.stdout.flush()
 
-# PLAYER OBJECT
+# PLAYER OBJECT + FUNCTIONS
 
 class Player():
     def __init__(self, num, colors):
         self.num = num
-        self.color = colors[self.num]
-        self.blocks = [[[[1],[0],[0]], [[1,1],[0,0],[0,0]], [[1,1,1],[0,0,0],[0,0,0]], [[1,1,1,1],[0,0,0,0],[0,0,0,0]], [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]]], [[[1,1],[0,1],[0,0]], [[1,1,1],[0,0,1],[0,0,0]], [[1,1,1],[0,1,0],[0,0,0]], [[1,1],[1,1],[0,0]], [[1,1,0],[0,1,1],[0,0,0]], [[1,1,1,1],[1,0,0,0],[0,0,0,0]], [[1,1,1,0],[0,0,1,1],[0,0,0,0]], [[1,1,1],[0,1,1],[0,0,0]]], [[[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0,0],[1,1,1,1],[0,0,0,0]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]]
+        self.color = colors[self.num+1]
+        self.blocks = [[[[1]], [[1,1]], [[1,1,1]], [[1,1,1,1]], [[1,1,1,1,1]]], [[[1,1],[0,1]], [[1,1,1],[0,0,1]], [[1,1,1],[0,1,0]], [[1,1],[1,1]], [[1,1,0],[0,1,1]], [[1,1,1,1],[1,0,0,0]], [[1,1,1,0],[0,0,1,1]], [[1,1,1],[0,1,1]], [[0,1,0,0],[1,1,1,1],[0,0,0,0]]], [[[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]]
         sleep(0.5)
         self.name = self.getName()
         print()
@@ -51,6 +55,13 @@ class Player():
     def turn(self):
         self.displayName()
         self.displayBlocks()
+
+        sleep(1)
+        row, block = self.chooseBlock()
+
+        pos = self.getBlockPos()
+
+        possible = self.checkBlock(row, block, pos)
     
     def displayName(self):
         printStuff = " "*int(50 - len(self.name)/2) + self.name
@@ -60,21 +71,80 @@ class Player():
     def displayBlocks(self):
         printStuff = []
 
-        for i in range(3): # for each row bc each block takes 3 rows
-            for section in range(len(self.blocks)): # for each section so the user can see easier
+        for section in range(len(self.blocks)): # for each section so the user can see easier
+            printStuff.append("")
+            for i in range(len(self.blocks[section][0])): # for each row in the first item in the list (all have same length)
                 printStuff.append("")
 
                 for block in self.blocks[section]: # for each block in the section
                     for b in range(len(block[i])): # for each pixel in the row of the block
                         block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
 
-                    printStuff[section*i] += "".join(block[i])
-                    printStuff[section*i] += "  "
+                    printStuff[-1] += "".join(block[i])
+                    printStuff[-1] += "  "
 
         printStuff.append("")
 
+        printStuff.pop(0)
+
+        # to add the numbers + align them
+        for line in range(len(printStuff)):
+            if line in [0, 2, 5]:
+                printStuff[line] = f"{[1,1,2,2,2,3][line]}:  " + printStuff[line]
+            
+            else:
+                printStuff[line] = "    " + printStuff[line]
+
         for i in printStuff:
             print(i)
+
+    def chooseBlock(self):
+        row = input(colored_txt(f"Chosen block row:\n", (0,255,255))+change_col((74,134,232)))
+
+        while not row in ["1","2","3"]:
+            print()
+            print(colored_txt("ERROR", (255,0,0))+colored_txt(": block row must be in the range 1-3", (200,0,0)))
+            print()
+            row = input(colored_txt(f"Chosen block row:\n", (0,255,255))+change_col((74,134,232)))
+        
+        row = int(row)
+        row -= 1
+
+        print()
+
+        sleep(0.5)
+
+        block = input(colored_txt(f"Chosen block (count from left):\n", (0,255,255))+change_col((74,134,232)))
+
+        while not (block.isdigit() and int(block) >= 1 and int(block) <= len(self.blocks[row])):
+            print()
+            print(colored_txt("ERROR", (255,0,0))+colored_txt(f": block number must be in the range 1-{len(self.blocks[row])}", (200,0,0)))
+            print()
+            block = input(colored_txt(f"Chosen block (count from left):\n", (0,255,255))+change_col((74,134,232)))
+
+        block = int(block)
+        block -= 1
+
+        print()
+
+        return row, block
+
+    def getBlockPos(self):
+        pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232)))
+
+        pos = pos.split(",")
+
+        while not (len(pos) == 2 and pos[0].isdigit() and pos[1].isdigit() and int(1 <= pos[0] <= 20) and int(1 <= pos[1] <= 20)):
+            print()
+            print(colored_txt("ERROR", (255,0,0))+colored_txt(": coordinates must be 2 numbers in the range 1-20 representing x and y seperated by commas", (200,0,0)))
+            print()
+            pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232)))
+        
+        pos = (int(pos[0])-1, int(pos[1])-1)
+
+        print()
+
+        return pos
 
 # MY FUNCTIONS FOR STRUCTURED PROGRAMMING
 
@@ -160,7 +230,7 @@ def printBoard(board, colors):
     print()
 
 def main():
-    colors = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
+    colors = [(255,255,255), (255,0,0), (0,255,0), (0,0,255), (255,255,0)]
 
     board, players, totalPlayers, currentPlayer = setup(colors)
 
@@ -169,6 +239,7 @@ def main():
 
     printBoard(board, colors)
 
+    sleep(1)
     players[currentPlayer].turn()
 
 main()
