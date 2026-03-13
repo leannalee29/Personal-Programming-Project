@@ -59,6 +59,7 @@ class Player():
         sleep(1)
         row, block = self.chooseBlock()
 
+        sleep(1)
         pos = self.getBlockPos()
 
         possible = self.checkBlock(row, block, pos)
@@ -130,15 +131,13 @@ class Player():
         return row, block
 
     def getBlockPos(self):
-        pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232)))
+        pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232))).split(",")
 
-        pos = pos.split(",")
-
-        while not (len(pos) == 2 and pos[0].isdigit() and pos[1].isdigit() and int(1 <= pos[0] <= 20) and int(1 <= pos[1] <= 20)):
+        while not (len(pos) == 2 and pos[0].isdigit() and pos[1].isdigit() and 1 <= int(pos[0]) <= 20 and 1 <= int(pos[1]) <= 20):
             print()
             print(colored_txt("ERROR", (255,0,0))+colored_txt(": coordinates must be 2 numbers in the range 1-20 representing x and y seperated by commas", (200,0,0)))
             print()
-            pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232)))
+            pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232))).split(",")
         
         pos = (int(pos[0])-1, int(pos[1])-1)
 
@@ -199,12 +198,15 @@ Once everyone has forfeited, the player with the least amount of block tiles lef
     print()
 
 def getPlayers():
-    totalPlayers = int(input(colored_txt("Players: (2-4)\n", (0,255,255))+change_col((74,134,232))))
-    while not 2 <= totalPlayers <= 4:
+    totalPlayers = input(colored_txt("Players: (2-4)\n", (0,255,255))+change_col((74,134,232)))
+    while not (totalPlayers.isdigit() and 2 <= int(totalPlayers) <= 4):
         print()
         print(colored_txt("ERROR", (255,0,0))+colored_txt(": number of players must be in between 2 and 4", (200,0,0)))
         print()
-        totalPlayers = int(input(colored_txt("Players: (2-4)\n", (0,255,255))+change_col((74,134,232))))
+        totalPlayers = input(colored_txt("Players: (2-4)\n", (0,255,255))+change_col((74,134,232)))
+
+    totalPlayers = int(totalPlayers)
+
     print()
 
     return totalPlayers
