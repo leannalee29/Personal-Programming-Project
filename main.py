@@ -19,6 +19,7 @@ print(rotated_clockwise)
 
 from time import sleep
 import sys
+from copy import deepcopy
 
 # GENERAL FUNCTIONS THAT I NEED TO USE
 
@@ -52,7 +53,7 @@ class Player():
     def getName(self):
         return input(colored_txt(f"Player {self.num+1} name:\n", self.color)+change_col((74,134,232)))
     
-    def turn(self):
+    def turn(self, board):
         self.displayName()
         self.displayBlocks()
 
@@ -62,7 +63,12 @@ class Player():
         sleep(1)
         pos = self.getBlockPos()
 
-        possible = self.checkBlock(row, block, pos)
+        possible, boardCopy = self.checkBlock(row, block, pos, board)
+
+        if possible:
+            board = deepcopy(boardCopy)
+        
+        return board
     
     def displayName(self):
         printStuff = " "*int(50 - len(self.name)/2) + self.name
@@ -145,6 +151,46 @@ class Player():
 
         return pos
 
+    def checkBlock(self, row, block, pos, board):
+        chosenBlock = self.blocks[row][block]
+
+        boardCopy = deepcopy(board)
+
+        for y in range(len(chosenBlock)):
+            for x in range(len(chosenBlock[y])):
+                boardCopy[y+pos[1]][y+pos[0]] = chosenBlock[y][x]
+        
+        possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num), checkNoSide(boardCopy, board, self.num)]
+        
+        if all(possible):
+            return True, boardCopy
+
+def checkOverlap(boardCopy, board):
+    for y in range(len(board)):
+        for x in range(len(board[y])):
+            if board[y][x] != boardCopy[y][x] and board[y][x] != 0:
+                return False
+
+    return True
+
+def checkCorner(boardCopy, board, n):
+    for y in range(len(board)):
+        for x in range(len(board[y])):
+            if board[y][x] != boardCopy[y][x]:
+                if board[y+1][x+1] == n or board[y+1][x-1] == n or board[y-1][x+1] == n or board[y-1][x-1] == n:
+                    return True
+
+    return False
+
+def checkNoSide(boardCopy, board, n):
+    for y in range(len(board)):
+        for x in range(len(board[y])):
+            if board[y][x] != boardCopy[y][x]:
+                if board[y+1][x] == n or board[y-1][x] == n or board[y][x+1] == n or board[y][x-1] == n:
+                    return True
+    
+    return False
+
 # MY FUNCTIONS FOR STRUCTURED PROGRAMMING
 
 def setup(colors):
@@ -165,7 +211,7 @@ def setup(colors):
     for i in range(totalPlayers):
         players.append(Player(i, colors))
 
-    return board, players, totalPlayers, currentPlayer
+    return board, players, totalPlayers, currentPlayer, False
 
 def printSetup():
     banner = f"""
@@ -234,14 +280,15 @@ def printBoard(board, colors):
 def main():
     colors = [(255,255,255), (255,0,0), (0,255,0), (0,0,255), (255,255,0)]
 
-    board, players, totalPlayers, currentPlayer = setup(colors)
+    board, players, totalPlayers, currentPlayer, gameOver = setup(colors)
 
-    sleep(1)
-    clear_screen()
+    while not gameOver:
+        sleep(1)
+        clear_screen()
 
-    printBoard(board, colors)
+        printBoard(board, colors)
 
-    sleep(1)
-    players[currentPlayer].turn()
+        sleep(1)
+        players[currentPlayer].turn(board)
 
 main()
