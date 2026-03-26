@@ -65,6 +65,17 @@ class Player():
 
         possible, boardCopy = self.checkBlock(row, block, pos, board)
 
+        while not possible:
+            print(f"{colored_txt("ERROR", (255,0,0))}{colored_txt(": position not possible", (200,0,0))}")
+
+            sleep(1)
+            row, block = self.chooseBlock()
+
+            sleep(1)
+            pos = self.getBlockPos()
+
+            possible, boardCopy = self.checkBlock(row, block, pos, board)
+
         if possible:
             board = deepcopy(boardCopy)
         
@@ -83,7 +94,7 @@ class Player():
             for i in range(len(self.blocks[section][0])): # for each row in the first item in the list (all have same length)
                 printStuff.append("")
 
-                for block in self.blocks[section]: # for each block in the section
+                for block in deepcopy(self.blocks[section]): # for each block in the section
                     for b in range(len(block[i])): # for each pixel in the row of the block
                         block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
 
@@ -106,13 +117,20 @@ class Player():
             print(i)
 
     def chooseBlock(self):
-        row = input(colored_txt(f"Chosen block row:\n", (0,255,255))+change_col((74,134,232)))
+        row = input(colored_txt(f"Chosen block row: (type 'help' for rules)\n", (0,255,255))+change_col((74,134,232)))
 
         while not row in ["1","2","3"]:
             print()
-            print(colored_txt("ERROR", (255,0,0))+colored_txt(": block row must be in the range 1-3", (200,0,0)))
-            print()
-            row = input(colored_txt(f"Chosen block row:\n", (0,255,255))+change_col((74,134,232)))
+
+            if row == "help":
+                printRules()
+                self.displayBlocks()
+
+            else:
+                print(colored_txt("ERROR", (255,0,0))+colored_txt(": block row must be in the range 1-3", (200,0,0)))
+                print()
+
+            row = input(colored_txt(f"Chosen block row: (type 'help' for rules)\n", (0,255,255))+change_col((74,134,232)))
         
         row = int(row)
         row -= 1
@@ -137,13 +155,13 @@ class Player():
         return row, block
 
     def getBlockPos(self):
-        pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232))).split(",")
+        pos = input(colored_txt(f"Enter x,y coordinates of the top left pixel of the block (top left - bottom right)\nFormat: x,y (e.g. 5,17):\n", (0,255,255))+change_col((74,134,232))).split(",")
 
         while not (len(pos) == 2 and pos[0].isdigit() and pos[1].isdigit() and 1 <= int(pos[0]) <= 20 and 1 <= int(pos[1]) <= 20):
             print()
             print(colored_txt("ERROR", (255,0,0))+colored_txt(": coordinates must be 2 numbers in the range 1-20 representing x and y seperated by commas", (200,0,0)))
             print()
-            pos = input(colored_txt(f"Enter x,y coordinates of the top right pixel of the block (top right - bottom left)\nFormat: x,y (e.g. 53,29):\n", (0,255,255))+change_col((74,134,232))).split(",")
+            pos = input(colored_txt(f"Enter x,y coordinates of the top left pixel of the block (top left - bottom right)\nFormat: x,y (e.g. 13,12):\n", (0,255,255))+change_col((74,134,232))).split(",")
         
         pos = (int(pos[0])-1, int(pos[1])-1)
 
@@ -158,17 +176,24 @@ class Player():
 
         for y in range(len(chosenBlock)):
             for x in range(len(chosenBlock[y])):
-                boardCopy[y+pos[1]][y+pos[0]] = chosenBlock[y][x]
+                try:
+                    boardCopy[y+pos[1]][x+pos[0]] = chosenBlock[y][x]
+                except:
+                    return False, board
         
         possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num), checkNoSide(boardCopy, board, self.num)]
         
         if all(possible):
             return True, boardCopy
+        else:
+            print(possible)
+            return False, board
 
 def checkOverlap(boardCopy, board):
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x] and board[y][x] != 0:
+                print(board[y][x], boardCopy[y][x], y, x)
                 return False
 
     return True
@@ -177,16 +202,33 @@ def checkCorner(boardCopy, board, n):
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
-                if board[y+1][x+1] == n or board[y+1][x-1] == n or board[y-1][x+1] == n or board[y-1][x-1] == n:
+                check_max_y = y < 19
+                check_max_x = x < 19
+                check_min_y = y > 0
+                check_min_x = x > 0
+
+                if  check_max_y and check_max_x and board[y+1][x+1] == n or \
+                    check_max_y and check_min_x and board[y+1][x-1] == n or \
+                    check_min_y and check_max_x and board[y-1][x+1] == n or \
+                    check_min_y and check_min_x and board[y-1][x-1] == n:
+
+                    return True
+                
+                if y in [19, 0] and x in [19,0]:
                     return True
 
     return False
 
-def checkNoSide(boardCopy, board, n):
+def checkNoSide(boardCopy, board, n): # FIX THIS I THINK MY RETURNS ARE BACKWARDS BUT SOMEHOW IT WORKS FOR THE FIRST ONE????
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
-                if board[y+1][x] == n or board[y-1][x] == n or board[y][x+1] == n or board[y][x-1] == n:
+                if  y < 19 and board[y+1][x] == n or \
+                    y > 0 and board[y-1][x] == n or \
+                    x < 19 and board[y][x+1] == n or \
+                    x > 0 and board[y][x-1] == n:
+                    
+                    print("YUR DED")
                     return True
     
     return False
@@ -223,7 +265,22 @@ def printSetup():
              ||    {colored_txt("      ", (0,0,255),True)}      {colored_txt("       ", (0,255,0),True)}     {colored_txt("    ", (0,255,0),True)}      {colored_txt("  ", (255,0,0),True)}  {colored_txt("  ", (255,0,0),True)}     {colored_txt("    ", (255,0,0),True)}     {colored_txt("      ", (255,255,0),True)}      ||
 =====================================================================================================
 """
-    
+#     banner = f"""
+# ██████╗░██╗░░░░░░█████╗░██╗░░██╗██╗░░░██╗░██████╗
+# ██╔══██╗██║░░░░░██╔══██╗██║░██╔╝██║░░░██║██╔════╝
+# ██████╦╝██║░░░░░██║░░██║█████═╝░██║░░░██║╚█████╗░
+# ██╔══██╗██║░░░░░██║░░██║██╔═██╗░██║░░░██║░╚═══██╗
+# ██████╦╝███████╗╚█████╔╝██║░╚██╗╚██████╔╝██████╔╝
+# ╚═════╝░╚══════╝░╚════╝░╚═╝░░╚═╝░╚═════╝░╚═════╝░
+#     """
+
+    print(banner)
+    sleep(1)
+    print()
+
+    printRules()
+
+def printRules():
     rules = f"""{colored_txt("RULES",(255,255,0))}
 
 {colored_txt("""PLAYING THE GAME:
@@ -235,10 +292,6 @@ It must not overlap""",(255,0,0))}
 {colored_txt("""WINNING THE GAME:
 Once everyone has forfeited, the player with the least amount of block tiles left will win""",(255,153,0))}
 """
-
-    print(banner)
-    sleep(1)
-    print()
     print(rules)
     sleep(2)
     print()
@@ -284,11 +337,16 @@ def main():
 
     while not gameOver:
         sleep(1)
-        clear_screen()
+        #clear_screen()
 
         printBoard(board, colors)
 
         sleep(1)
-        players[currentPlayer].turn(board)
+        board = players[currentPlayer].turn(board)
+
+        currentPlayer += 1
+        currentPlayer = currentPlayer % totalPlayers
+
+        print(board)
 
 main()
