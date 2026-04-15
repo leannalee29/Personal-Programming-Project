@@ -43,15 +43,17 @@ def clear_screen():
 
 class Player():
     def __init__(self, num, colors):
-        self.num = num
-        self.color = colors[self.num+1]
+        self.num = num + 1
+        self.color = colors[self.num]
         self.blocks = [[[[1]], [[1,1]], [[1,1,1]], [[1,1,1,1]], [[1,1,1,1,1]]], [[[1,1],[0,1]], [[1,1,1],[0,0,1]], [[1,1,1],[0,1,0]], [[1,1],[1,1]], [[1,1,0],[0,1,1]], [[1,1,1,1],[1,0,0,0]], [[1,1,1,0],[0,0,1,1]], [[1,1,1],[0,1,1]], [[0,1,0,0],[1,1,1,1],[0,0,0,0]]], [[[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]]
+        
         sleep(0.5)
+        self.firstTurn = True
         self.name = self.getName()
         print()
 
     def getName(self):
-        return input(colored_txt(f"Player {self.num+1} name:\n", self.color)+change_col((74,134,232)))
+        return input(colored_txt(f"Player {self.num} name:\n", self.color)+change_col((74,134,232)))
     
     def turn(self, board):
         self.displayName()
@@ -78,6 +80,8 @@ class Player():
 
         if possible:
             board = deepcopy(boardCopy)
+        
+        self.firstTurn = False
         
         return board
     
@@ -177,11 +181,12 @@ class Player():
         for y in range(len(chosenBlock)):
             for x in range(len(chosenBlock[y])):
                 try:
-                    boardCopy[y+pos[1]][x+pos[0]] = chosenBlock[y][x]
+                    boardCopy[y+pos[1]][x+pos[0]] = chosenBlock[y][x] * self.num
                 except:
                     return False, board
         
-        possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num), checkNoSide(boardCopy, board, self.num)]
+        # boardCopy = new. board = old
+        possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num, self.firstTurn), checkNoSide(boardCopy, board, self.num)]
         
         if all(possible):
             return True, boardCopy
@@ -198,24 +203,26 @@ def checkOverlap(boardCopy, board):
 
     return True
 
-def checkCorner(boardCopy, board, n):
+def checkCorner(boardCopy, board, n, firstTurn):
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
-                check_max_y = y < 19
-                check_max_x = x < 19
-                check_min_y = y > 0
-                check_min_x = x > 0
+                if firstTurn:
+                    if y in [19, 0] and x in [19, 0]:
+                        return True
+                    
+                else:
+                    check_max_y = y < 19
+                    check_max_x = x < 19
+                    check_min_y = y > 0
+                    check_min_x = x > 0
 
-                if  check_max_y and check_max_x and board[y+1][x+1] == n or \
-                    check_max_y and check_min_x and board[y+1][x-1] == n or \
-                    check_min_y and check_max_x and board[y-1][x+1] == n or \
-                    check_min_y and check_min_x and board[y-1][x-1] == n:
+                    if  check_max_y and check_max_x and board[y+1][x+1] == n or \
+                        check_max_y and check_min_x and board[y+1][x-1] == n or \
+                        check_min_y and check_max_x and board[y-1][x+1] == n or \
+                        check_min_y and check_min_x and board[y-1][x-1] == n:
 
-                    return True
-                
-                if y in [19, 0] and x in [19,0]:
-                    return True
+                        return True
 
     return False
 
@@ -223,15 +230,18 @@ def checkNoSide(boardCopy, board, n): # FIX THIS I THINK MY RETURNS ARE BACKWARD
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
+                print(n)
                 if  y < 19 and board[y+1][x] == n or \
-                    y > 0 and board[y-1][x] == n or \
+                    y > 0  and board[y-1][x] == n or \
                     x < 19 and board[y][x+1] == n or \
-                    x > 0 and board[y][x-1] == n:
+                    x > 0  and board[y][x-1] == n:
+
+                    print(y < 19 and board[y+1][x] == n, y > 0  and board[y-1][x] == n, x < 19 and board[y][x+1] == n, x > 0  and board[y][x-1] == n)
                     
                     print("YUR DED")
-                    return True
+                    return False
     
-    return False
+    return True
 
 # MY FUNCTIONS FOR STRUCTURED PROGRAMMING
 
