@@ -47,6 +47,8 @@ class Player():
         self.color = colors[self.num]
         self.blocks = [[[[1]], [[1,1]], [[1,1,1]], [[1,1,1,1]], [[1,1,1,1,1]]], [[[1,1],[0,1]], [[1,1,1],[0,0,1]], [[1,1,1],[0,1,0]], [[1,1],[1,1]], [[1,1,0],[0,1,1]], [[1,1,1,1],[1,0,0,0]], [[1,1,1,0],[0,0,1,1]], [[1,1,1],[0,1,1]], [[0,1,0,0],[1,1,1,1],[0,0,0,0]]], [[[1,1,1],[0,0,1],[0,0,1]], [[0,1,1],[1,1,0],[1,0,0]], [[1,1,0],[0,1,0],[0,1,1]], [[1,1],[0,1],[1,1]], [[0,1,0],[1,1,1],[0,1,0]], [[1,1,0],[0,1,1],[0,1,0]], [[0,0,1],[1,1,1],[0,0,1]]]]
         
+        self.dead = False
+
         sleep(0.5)
         self.firstTurn = True
         self.name = self.getName()
@@ -77,6 +79,8 @@ class Player():
             pos = self.getBlockPos()
 
             possible, boardCopy = self.checkBlock(row, block, pos, board)
+        
+        self.blocks[row].pop(block)
 
         if possible:
             board = deepcopy(boardCopy)
@@ -128,7 +132,6 @@ class Player():
 
             if row == "help":
                 printRules()
-                self.displayBlocks()
 
             else:
                 print(colored_txt("ERROR", (255,0,0))+colored_txt(": block row must be in the range 1-3", (200,0,0)))
@@ -191,8 +194,19 @@ class Player():
         if all(possible):
             return True, boardCopy
         else:
-            print(possible)
             return False, board
+
+    def checkDead(self, board):
+        for row in range(len(self.blocks)):
+            for block in range(len(self.blocks[row])):
+                for y in range(len(board)):
+                    for x in range(len(board[y])):
+                        possible, boardCopy = self.checkBlock(row, block, (x,y), board)
+                        if possible:
+                            return
+        
+        self.dead = True
+        return
 
 def checkOverlap(boardCopy, board):
     for y in range(len(board)):
@@ -230,15 +244,11 @@ def checkNoSide(boardCopy, board, n): # FIX THIS I THINK MY RETURNS ARE BACKWARD
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
-                print(n)
                 if  y < 19 and board[y+1][x] == n or \
                     y > 0  and board[y-1][x] == n or \
                     x < 19 and board[y][x+1] == n or \
                     x > 0  and board[y][x-1] == n:
-
-                    print(y < 19 and board[y+1][x] == n, y > 0  and board[y-1][x] == n, x < 19 and board[y][x+1] == n, x > 0  and board[y][x-1] == n)
                     
-                    print("YUR DED")
                     return False
     
     return True
@@ -349,6 +359,9 @@ def main():
         sleep(1)
         #clear_screen()
 
+        players[currentPlayer].checkDead(board)
+        print(players[currentPlayer].dead)
+
         printBoard(board, colors)
 
         sleep(1)
@@ -356,7 +369,5 @@ def main():
 
         currentPlayer += 1
         currentPlayer = currentPlayer % totalPlayers
-
-        print(board)
 
 main()
