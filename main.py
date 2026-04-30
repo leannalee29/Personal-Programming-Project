@@ -4,18 +4,17 @@
 # error word color: (255,0,0)
 # error message color: (200,0,0)
 
-"""
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
+
+matrix = [[1, 1, 1], [0, 0, 1], [0, 0, 1]]
 
 rotated_clockwise = [list(row) for row in zip(*matrix[::-1])]
 
 print(rotated_clockwise)
+rotated_clockwise = [list(row) for row in zip(*rotated_clockwise[::-1])]
+
+print(rotated_clockwise)
 # Output: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
-"""
+
 
 from time import sleep
 import sys
@@ -65,6 +64,9 @@ class Player():
         row, block = self.chooseBlock()
 
         sleep(1)
+        self.displayRotations(row, block)
+
+        sleep(1)
         pos = self.getBlockPos()
 
         possible, boardCopy = self.checkBlock(row, block, pos, board)
@@ -74,6 +76,9 @@ class Player():
 
             sleep(1)
             row, block = self.chooseBlock()
+
+            sleep(1)
+            self.displayRotations(row, block)
 
             sleep(1)
             pos = self.getBlockPos()
@@ -175,6 +180,43 @@ class Player():
         print()
 
         return pos
+
+    def displayRotations(self, row, block):
+        blocks = []
+        next = deepcopy(self.blocks[row][block])
+        print(next)
+
+        for i in range(4):
+            blocks.append(deepcopy(next))
+            next = [list(r) for r in zip(*next[::-1])]
+        print(blocks)
+
+        printStuff = []
+
+        for i in range(len(blocks[0])): # for each row in the first item in the list (all have same length)
+            printStuff.append("")
+
+            for block in deepcopy(blocks): # for each block in the section
+                for b in range(len(block[i])): # for each pixel in the row of the block
+                    block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
+
+                printStuff[-1] += "".join(block[i])
+                printStuff[-1] += "  "
+
+        printStuff.append("")
+
+        printStuff.pop(0)
+
+        # to add the numbers + align them
+        # for line in range(len(printStuff)):
+        #     if line in [0, 2, 5]:
+        #         printStuff[line] = f"{[1,1,2,2,2,3][line]}:  " + printStuff[line]
+            
+        #     else:
+        #         printStuff[line] = "    " + printStuff[line]
+
+        for i in printStuff:
+            print(i)
 
     def checkBlock(self, row, block, pos, board):
         chosenBlock = self.blocks[row][block]
