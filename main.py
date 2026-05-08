@@ -64,7 +64,10 @@ class Player():
         row, block = self.chooseBlock()
 
         sleep(1)
-        self.displayRotations(row, block)
+        #rotated = self.displayRotations(row, block)
+
+        sleep(0.5)
+        #rotation = self.chooseRotation()
 
         sleep(1)
         pos = self.getBlockPos()
@@ -78,7 +81,10 @@ class Player():
             row, block = self.chooseBlock()
 
             sleep(1)
-            self.displayRotations(row, block)
+            #rotated = self.displayRotations(row, block)
+
+            sleep(0.5)
+            #rotation = self.chooseRotation()
 
             sleep(1)
             pos = self.getBlockPos()
@@ -184,39 +190,67 @@ class Player():
     def displayRotations(self, row, block):
         blocks = []
         next = deepcopy(self.blocks[row][block])
-        print(next)
 
         for i in range(4):
             blocks.append(deepcopy(next))
             next = [list(r) for r in zip(*next[::-1])]
-        print(blocks)
 
         printStuff = []
-
-        for i in range(len(blocks[0])): # for each row in the first item in the list (all have same length)
+        
+        length = 0
+        for i in blocks:
+            if len(blocks) > length:
+                length = len(blocks)
+                
+        for i in range(length):
             printStuff.append("")
 
             for block in deepcopy(blocks): # for each block in the section
-                for b in range(len(block[i])): # for each pixel in the row of the block
-                    block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
+                if len(block) > i:
+                    for b in range(len(block[i])): # for each pixel in the row of the block
+                        block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
+                # else:
+                #     block.append(list(block[0]))
+                #     print(block, length)
+                #     for b in range(len(block[0])): # for each pixel in the row of the block
+                #         block[i][b] = colored_txt("  ", (0,0,0), True)
 
                 printStuff[-1] += "".join(block[i])
                 printStuff[-1] += "  "
 
         printStuff.append("")
-
-        printStuff.pop(0)
-
-        # to add the numbers + align them
-        # for line in range(len(printStuff)):
-        #     if line in [0, 2, 5]:
-        #         printStuff[line] = f"{[1,1,2,2,2,3][line]}:  " + printStuff[line]
-            
-        #     else:
-        #         printStuff[line] = "    " + printStuff[line]
+        
+        for i in range(len(blocks)):
+            printStuff[-1] += str(i) + " "*(len(blocks[i][0])*2+1)
 
         for i in printStuff:
             print(i)
+        
+        print()
+
+        return deepcopy(blocks)
+
+    def chooseRotation(self):
+        rotation = input(colored_txt(f"Chosen rotation (1-4): (type 'help' for rules)\n", (0,255,255))+change_col((74,134,232)))
+
+        while not rotation in ["1","2","3","4"]:
+            print()
+
+            if rotation == "help":
+                printRules()
+
+            else:
+                print(colored_txt("ERROR", (255,0,0))+colored_txt(": rotation must be in the range 1-4", (200,0,0)))
+                print()
+
+            rotation = input(colored_txt(f"Chosen rotation (1-4): (type 'help' for rules)\n", (0,255,255))+change_col((74,134,232)))
+        
+        rotation = int(rotation)
+        rotation -= 1
+
+        print()
+
+        return rotation
 
     def checkBlock(self, row, block, pos, board):
         chosenBlock = self.blocks[row][block]
