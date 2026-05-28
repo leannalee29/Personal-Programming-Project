@@ -4,17 +4,8 @@
 # error word color: (255,0,0)
 # error message color: (200,0,0)
 
-
-matrix = [[1, 1, 1], [0, 0, 1], [0, 0, 1]]
-
-rotated_clockwise = [list(row) for row in zip(*matrix[::-1])]
-
-print(rotated_clockwise)
-rotated_clockwise = [list(row) for row in zip(*rotated_clockwise[::-1])]
-
-print(rotated_clockwise)
-# Output: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
-
+# TODO:
+# add codes e.g. 1
 
 from time import sleep
 import sys
@@ -60,22 +51,11 @@ class Player():
         self.displayName()
         self.displayBlocks()
 
-        sleep(1)
-        row, block = self.chooseBlock()
+        possible = None
 
-        sleep(1)
-        rotated = self.displayRotations(row, block)
-
-        sleep(0.5)
-        rotation = self.chooseRotation()
-
-        sleep(1)
-        pos = self.getBlockPos()
-
-        possible, boardCopy = self.checkBlock(row, block, pos, board)
-
-        while not possible:
-            print(f"{colored_txt("ERROR", (255,0,0))}{colored_txt(": position not possible", (200,0,0))}")
+        while possible in [False, None]:
+            if possible == False:
+                print(f"{colored_txt("ERROR", (255,0,0))}{colored_txt(": position not possible", (200,0,0))}")
 
             sleep(1)
             row, block = self.chooseBlock()
@@ -89,7 +69,7 @@ class Player():
             sleep(1)
             pos = self.getBlockPos()
 
-            possible, boardCopy = self.checkBlock(row, block, pos, board)
+            possible, boardCopy = self.checkBlock(rotated[rotation], pos, board)
         
         self.blocks[row].pop(block)
 
@@ -173,17 +153,18 @@ class Player():
         return row, block
 
     def getBlockPos(self):
-        pos = input(colored_txt(f"Enter x,y coordinates of the top left pixel of the block (top left - bottom right)\nFormat: x,y (e.g. 5,17):\n", (0,255,255))+change_col((74,134,232))).split(",")
+        pos = input(colored_txt(f"Enter code of the top left pixel of the block\ne.g. AT, CP (case not sensitive):\n", (0,255,255))+change_col((74,134,232)))
 
-        while not (len(pos) == 2 and pos[0].isdigit() and pos[1].isdigit() and 1 <= int(pos[0]) <= 20 and 1 <= int(pos[1]) <= 20):
+        while not (len(pos) == 2 and pos.isalpha() and pos[0].lower() in "abcdefghij" and pos[1].lower() in "abcdefghij"):
             print()
-            print(colored_txt("ERROR", (255,0,0))+colored_txt(": coordinates must be 2 numbers in the range 1-20 representing x and y seperated by commas", (200,0,0)))
+            print(colored_txt("ERROR", (255,0,0))+colored_txt(": code must be 2 characters long, consisting of 1 number and 1 letter", (200,0,0)))
             print()
-            pos = input(colored_txt(f"Enter x,y coordinates of the top left pixel of the block (top left - bottom right)\nFormat: x,y (e.g. 13,12):\n", (0,255,255))+change_col((74,134,232))).split(",")
+            pos = input(colored_txt(f"Enter code of the top left pixel of the block\ne.g. AT, CP (case not sensitive):\n", (0,255,255))+change_col((74,134,232)))
         
-        pos = (int(pos[0])-1, int(pos[1])-1)
+        pos = ("abcdefghijklmnopqrst".index(pos[0].lower()), "abcdefghijklmnopqrst".index(pos[1].lower()))
 
         print()
+        print(pos)
 
         return pos
 
@@ -254,8 +235,8 @@ class Player():
 
         return rotation
 
-    def checkBlock(self, row, block, pos, board):
-        chosenBlock = self.blocks[row][block]
+    def checkBlock(self, block, pos, board):
+        chosenBlock = block
 
         boardCopy = deepcopy(board)
 
@@ -267,7 +248,9 @@ class Player():
                     return False, board
         
         # boardCopy = new. board = old
-        possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num, self.firstTurn), checkNoSide(boardCopy, board, self.num)]
+        possible = [checkOverlap(boardCopy, board), 
+                    checkCorner(boardCopy, board, self.num, self.firstTurn), 
+                    checkNoSide(boardCopy, board, self.num)]
         
         if all(possible):
             return True, boardCopy
@@ -279,7 +262,7 @@ class Player():
             for block in range(len(self.blocks[row])):
                 for y in range(len(board)):
                     for x in range(len(board[y])):
-                        possible, boardCopy = self.checkBlock(row, block, (x,y), board)
+                        possible, boardCopy = self.checkBlock(self.blocks[row][block], (x,y), board)
                         if possible:
                             return
         
