@@ -64,10 +64,10 @@ class Player():
         row, block = self.chooseBlock()
 
         sleep(1)
-        #rotated = self.displayRotations(row, block)
+        rotated = self.displayRotations(row, block)
 
         sleep(0.5)
-        #rotation = self.chooseRotation()
+        rotation = self.chooseRotation()
 
         sleep(1)
         pos = self.getBlockPos()
@@ -81,10 +81,10 @@ class Player():
             row, block = self.chooseBlock()
 
             sleep(1)
-            #rotated = self.displayRotations(row, block)
+            rotated = self.displayRotations(row, block)
 
             sleep(0.5)
-            #rotation = self.chooseRotation()
+            rotation = self.chooseRotation()
 
             sleep(1)
             pos = self.getBlockPos()
@@ -201,19 +201,20 @@ class Player():
         for i in blocks:
             if len(blocks) > length:
                 length = len(blocks)
+        
+        OGblocks = deepcopy(blocks)
                 
         for i in range(length):
             printStuff.append("")
 
-            for block in deepcopy(blocks): # for each block in the section
+            for block in blocks: # for each block in the section
                 if len(block) > i:
                     for b in range(len(block[i])): # for each pixel in the row of the block
                         block[i][b] = colored_txt("  ", [(0,0,0), self.color][block[i][b]], True)
-                # else:
-                #     block.append(list(block[0]))
-                #     print(block, length)
-                #     for b in range(len(block[0])): # for each pixel in the row of the block
-                #         block[i][b] = colored_txt("  ", (0,0,0), True)
+                else:
+                    block.append(list(block[0]))
+                    for b in range(len(block[0])): # for each pixel in the row of the block
+                        block[i][b] = colored_txt("  ", (0,0,0), True)
 
                 printStuff[-1] += "".join(block[i])
                 printStuff[-1] += "  "
@@ -221,14 +222,15 @@ class Player():
         printStuff.append("")
         
         for i in range(len(blocks)):
-            printStuff[-1] += str(i) + " "*(len(blocks[i][0])*2+1)
+            printStuff[-1] += str(i+1) + " "*(len(blocks[i][0])*2+1)
 
         for i in printStuff:
-            print(i)
+            if not i.strip() == "":
+                print(i)
         
         print()
 
-        return deepcopy(blocks)
+        return OGblocks
 
     def chooseRotation(self):
         rotation = input(colored_txt(f"Chosen rotation (1-4): (type 'help' for rules)\n", (0,255,255))+change_col((74,134,232)))
@@ -316,7 +318,7 @@ def checkCorner(boardCopy, board, n, firstTurn):
 
     return False
 
-def checkNoSide(boardCopy, board, n): # FIX THIS I THINK MY RETURNS ARE BACKWARDS BUT SOMEHOW IT WORKS FOR THE FIRST ONE????
+def checkNoSide(boardCopy, board, n):
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x]:
