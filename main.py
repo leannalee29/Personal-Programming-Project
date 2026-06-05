@@ -43,7 +43,7 @@ class Player():
         self.firstTurn = True
         self.name = self.getName()
         print()
-
+    
     def getName(self):
         return input(colored_txt(f"Player {self.num} name:\n", self.color)+change_col((74,134,232)))
     
@@ -157,7 +157,7 @@ class Player():
 
         while not (len(pos) == 2 and pos.isalpha() and pos[0].lower() in "abcdefghij" and pos[1].lower() in "abcdefghij"):
             print()
-            print(colored_txt("ERROR", (255,0,0))+colored_txt(": code must be 2 characters long, consisting of 1 number and 1 letter", (200,0,0)))
+            print(colored_txt("ERROR", (255,0,0))+colored_txt(": code must be 2 characters long, consisting of 2 letters", (200,0,0)))
             print()
             pos = input(colored_txt(f"Enter code of the top left pixel of the block\ne.g. AT, CP (case not sensitive):\n", (0,255,255))+change_col((74,134,232)))
         
@@ -248,9 +248,7 @@ class Player():
                     return False, board
         
         # boardCopy = new. board = old
-        possible = [checkOverlap(boardCopy, board), 
-                    checkCorner(boardCopy, board, self.num, self.firstTurn), 
-                    checkNoSide(boardCopy, board, self.num)]
+        possible = [checkOverlap(boardCopy, board), checkCorner(boardCopy, board, self.num, self.firstTurn), checkNoSide(boardCopy, board, self.num)]
         
         if all(possible):
             return True, boardCopy
@@ -395,12 +393,14 @@ def printBoard(board, colors):
     printStuff = []
     printStuff.append(f"{change_col((255,255,255))}  ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══   ══")
     nextline = []
+
+    alphabet = "abcdefghijklmnopqrst"
     
     for y in range(len(board)):
         nextline = []
 
         for x in range(len(board[y])):
-            nextline.append(f"{colored_txt("██", colors[board[y][x]])}")
+            nextline.append(f"{colored_txt(f"{alphabet[x]}{alphabet[y]}", colors[board[y][x]], True)}")
         
         printStuff.append("‖ " + " | ".join(nextline) + " ‖")
 
