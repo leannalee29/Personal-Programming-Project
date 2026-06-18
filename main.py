@@ -155,7 +155,7 @@ class Player():
     def getBlockPos(self):
         pos = input(colored_txt(f"Enter code of the top left pixel of the block\ne.g. AT, CP (case not sensitive):\n", (0,255,255))+change_col((74,134,232)))
 
-        while not (len(pos) == 2 and pos.isalpha() and pos[0].lower() in "abcdefghij" and pos[1].lower() in "abcdefghij"):
+        while not (len(pos) == 2 and pos.isalpha() and pos[0].lower() in "abcdefghijklmnopqrst" and pos[1].lower() in "abcdefghijklmnopqrst"):
             print()
             print(colored_txt("ERROR", (255,0,0))+colored_txt(": code must be 2 characters long, consisting of 2 letters", (200,0,0)))
             print()
@@ -164,7 +164,6 @@ class Player():
         pos = ("abcdefghijklmnopqrst".index(pos[0].lower()), "abcdefghijklmnopqrst".index(pos[1].lower()))
 
         print()
-        print(pos)
 
         return pos
 
@@ -421,7 +420,6 @@ def main():
         #clear_screen()
 
         players[currentPlayer].checkDead(board)
-        print(players[currentPlayer].dead)
 
         printBoard(board, colors)
 
