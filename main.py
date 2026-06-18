@@ -270,7 +270,6 @@ def checkOverlap(boardCopy, board):
     for y in range(len(board)):
         for x in range(len(board[y])):
             if board[y][x] != boardCopy[y][x] and board[y][x] != 0:
-                print(board[y][x], boardCopy[y][x], y, x)
                 return False
 
     return True
@@ -417,7 +416,7 @@ def main():
 
     while not gameOver:
         sleep(1)
-        #clear_screen()
+        clear_screen()
 
         players[currentPlayer].checkDead(board)
 
